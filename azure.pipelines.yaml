@@ -1,0 +1,63 @@
+trigger: # trigger the pipeline for any changes to repo on master branch.
+  batch: true 
+  branches:
+    include:
+      - master 
+pr: none
+
+variables: 
+  # Agent VM image name
+  containerRegistry: 'techapp'
+  vmImageName: 'ubuntu-latest'
+  repository: 'techchallenge'
+
+stages:
+- stage: Build
+  displayName: Build Stage
+  jobs:  
+  - job: BuildAndPush
+    displayName: Build and Push Image
+    pool:
+      vmImage: $(vmImageName) # get latest ubuntu image from microsoft hosted pipelines"
+    steps:    
+    - task: Bash@3 # Bash script to export env variable "version" with git command output
+      displayName: 'GetTag'
+      inputs:
+        targetType: 'inline'
+        script: |
+         echo "##vso[task.setvariable variable=version;]$(git describe --tags)"
+      enabled: true
+    - task: Docker@2 # build and push docker image to ACR
+      displayName: Build and push an image to container registry
+      inputs:
+        command: buildAndPush
+        repository: $(repository)
+        dockerfile: '**/Dockerfile'
+        containerRegistry: '$(containerRegistry)'
+        tags: |
+          $(version)   
+    - task: replacetokens@3 # replacing the tags using "version" variable
+      displayName: Replace tokens in k8s manifest files
+      inputs:
+        rootDirectory: 'k8s'
+        targetFiles: 'node.yaml'
+        encoding: 'auto'
+        writeBOM: true
+        actionOnMissing: 'warn'
+        keepToken: false
+        tokenPrefix: '#{'
+        tokenSuffix: '}#'
+      enabled: true
+    - task: Kubernetes@1 # applying deployments to cluster
+      displayName: Deploying k8s manifests
+      inputs:
+        connectionType: 'Kubernetes Service Connection'
+        kubernetesServiceEndpoint: 'techappcluster'
+        namespace: 'default'
+        command: apply  
+        useConfigurationFile: true
+        configuration: 'k8s/node.yaml'
+        secretType: 'dockerRegistry'
+        containerRegistryType: 'Azure Container Registry'
+        outputFormat: 'yaml'
+      enabled: true      

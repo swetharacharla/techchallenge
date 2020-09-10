@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: node
+  name: node
+  namespace: techchallenge
+spec:
+   replicas: 1
+   strategy:
+        type: RollingUpdate
+   selector:
+     matchLabels:
+       app: node 
+   template:
+    metadata:
+       labels:
+          app: node
+    spec:      
+      imagePullSecrets:
+              - name: tech-acr-secret
+      containers:
+      - image: techapp.azurecr.io/techchallenge:#{version}#
+        imagePullPolicy: IfNotPresent
+        name: node
+        resources: {}
+        ports:
+          - containerPort: 4000          
+        env:      
+          - name: DATABASE
+            valueFrom:
+              secretKeyRef:
+                name: secrets
+                key: DATABASE
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: node
+   namespace: techchallenge
+spec:
+   ports:
+     - port: 4000
+   selector:
+      app: node
