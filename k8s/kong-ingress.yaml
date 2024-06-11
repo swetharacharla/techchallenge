@@ -1,8 +1,0 @@
-apiVersion: configuration.konghq.com/v1
-kind: KongIngress
-metadata:
-  name: ingress-https
-route:
-  protocols:
-    - https
-  https_redirect_status_code: 302
