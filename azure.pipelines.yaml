@@ -7,7 +7,7 @@ pr: none
 
 variables: 
   # Agent VM image name
-  containerRegistry: 'techapp'
+  containerRegistry: 'swethaacr'
   vmImageName: 'ubuntu-latest'
   repository: 'techchallenge'
 
@@ -35,24 +35,12 @@ stages:
         dockerfile: '**/Dockerfile'
         containerRegistry: '$(containerRegistry)'
         tags: |
-          $(version)   
-    - task: replacetokens@3 # replacing the tags using "version" variable
-      displayName: Replace tokens in k8s manifest files
-      inputs:
-        rootDirectory: 'k8s'
-        targetFiles: 'node.yaml'
-        encoding: 'auto'
-        writeBOM: true
-        actionOnMissing: 'warn'
-        keepToken: false
-        tokenPrefix: '#{'
-        tokenSuffix: '}#'
-      enabled: true
+          $(version)
     - task: Kubernetes@1 # applying deployments to cluster
       displayName: Deploying k8s manifests
       inputs:
         connectionType: 'Kubernetes Service Connection'
-        kubernetesServiceEndpoint: 'techappcluster'
+        kubernetesServiceEndpoint: 'testcluster'
         namespace: 'techchallenge'
         command: apply  
         useConfigurationFile: true
