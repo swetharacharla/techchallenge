@@ -39,7 +39,3 @@ variable "pod_cidr" {
 variable "load_balancer_sku" {
   default = "standard"
 }
-
-variable "CLIENT_ID" {}
-
-variable "CLIENT_SECRET" {}
