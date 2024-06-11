@@ -17,7 +17,6 @@ resource "azurerm_kubernetes_cluster" "k8s" {
   network_profile {
     network_plugin     = "${var.network_plugin}"
     dns_service_ip     = "${var.dns_service_ip}"
-    docker_bridge_cidr = "${var.docker_bridge_cidr}"
     service_cidr       = "${var.service_cidr}"
     pod_cidr           = "${var.pod_cidr}"
     load_balancer_sku  = "${var.load_balancer_sku}"
@@ -30,9 +29,6 @@ resource "azurerm_kubernetes_cluster" "k8s" {
     client_secret = "${var.CLIENT_SECRET}"
   }
 
-  role_based_access_control {
-    enabled = true
-  }
 
   tags = {
     dev = "techappchallenge"
