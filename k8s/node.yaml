@@ -20,7 +20,7 @@ spec:
       imagePullSecrets:
               - name: tech-acr-secret
       containers:
-      - image: techapp.azurecr.io/techchallenge:v1.0.0
+      - image: swethaacr.azurecr.io/techchallenge:v1.0.0
         imagePullPolicy: IfNotPresent
         name: node
         resources: {}
